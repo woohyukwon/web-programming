@@ -14,6 +14,7 @@ import errorHandler from 'errorhandler';
 import path from 'path';
 import lusca from 'lusca';
 import config from './environment';
+import session from 'express-session';
 
 export default function(app) {
     var env = process.env.NODE_ENV;
@@ -43,6 +44,13 @@ export default function(app) {
     app.use(methodOverride());
     app.use(cookieParser());
 
+  // We need to enable sessions for passport-twitter because it's an
+  // oauth 1.0 strategy, and Lusca depends on sessions
+  app.use(session({
+    secret: config.secrets.session,
+    saveUninitialized: true,
+    resave: false
+  }));
 
     /**
      * Lusca - express server security
