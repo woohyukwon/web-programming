@@ -40,7 +40,8 @@
         "passport-local": "^1.0.0",
         "passport-twitter": "^1.0.4",
         "rxjs-compat": "6",
-        "serve-favicon": "^2.5.0"
+        "serve-favicon": "^2.5.0",
+        "uuidv4": "^6.0.1"
     },
     "devDependencies": {
         "@angular/animations": "^8.2.14",
