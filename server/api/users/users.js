@@ -1,52 +1,95 @@
+'use strict';
+
+// uuidv4 will let us generate unique IDs for our users
 import uuidv4 from 'uuid/v4';
 
+// We are storing users in memory for now as JSON objects in an array
 let users = [];
 
+// The export keyword makes the function importable in other files
+// (such as /server/api/users/index.js)
 export function listContents(req, res) {
-  res.status(200);
+  // res.json will return the variable as its JSON string representation
+  // https://expressjs.com/en/api.html#res.json
   res.json({
     users: users
   });
 }
 
-
-
-export function findOne(req, res) {
-  // TODO implement
-  let findById = users.filter(function (user) {
-    if (user.id == req.params.id) {
+// I decided to delegate searching the array for a given ID to a helper function.
+// This will let it be reused later (like in an update function)
+function findUser(id) {
+  let foundUsers = users.filter(function(user) {
+    if(user.id === id) {
       return true;
     }
+    return false;
   });
-  if (findById.length == 1) {
-    res.status(200);
-    res.json(findUsers[0]);
+
+  if(foundUsers.length > 0) {
+    return foundUsers[0];
   } else {
-    res.status(404);
-    res.json({message: "Not Found!"});
+    // In JavaScript you could return null or undefined for "no such element"
+    // Here's some discussion about which return value might be better:
+    // https://stackoverflow.com/questions/37980559/is-it-better-to-return-undefined-or-null-from-a-javascript-function
+    return null;
   }
-  ;
-// Search every element in users array
-  // if id matches current element in array
-  // then 200 status code, and send user as response
-  // if you search whole array and find nothing
-  // 404 with message not found
 }
 
+export function findOne(req, res) {
+  // the :id in '/:id' declared by /server/api/users/index.js can be accessed in the request object
+  // under the params object, i.e. req.params.id
+  let existingUser = findUser(req.params.id);
 
+  if(existingUser) {
+    // Make sure to only call res.status and res.json *once* per request.
+    // If you try to set the status code twice, express.js will give you an error!
+    // A detailed explanation for this can be found here:
+    // https://stackoverflow.com/questions/7042340/error-cant-set-headers-after-they-are-sent-to-the-client
+    res.status(200);
+    res.json(existingUser);
+  } else {
+    // If you don't find the user make sure to return a 404 status code
+    // with a descriptive response
+    res.status(404);
+    res.json({message: 'Not Found'});
+  }
+}
 
 export function createUser(req, res) {
-  /* Implementation here */
+  // Generate a random ID
   let id = uuidv4();
-  if (!req.body.name || !req.body.address || req.body.age <= 0) {
-    res.status(400);
-    res.json({message: "Bad Request"});
-  }
-  else {
-  let name = req.body.name;
-  let address = req.body.address;
-  let age = req.body.age;
 
+  // The JSON you POST when calling /api/users
+  // is parsed automatically into req.body and can be accessed directly
+  let name = req.body.name;
+  // Validate parameter exists and is a string
+  if(!name || typeof name !== 'string') {
+    res.status(400);
+    return res.json({
+      error: 'name(String) is required'
+    });
+  }
+
+  let address = req.body.address;
+  // Validate parameter exists and is a string
+  if(!address || typeof address !== 'string') {
+    res.status(400);
+    return res.json({
+      error: 'address(String) is required'
+    });
+  }
+
+  let age = req.body.age;
+  // Validate parameter exists and is a number
+  if(!age || typeof age !== 'number') {
+    res.status(400);
+    return res.json({
+      error: 'age(Number) is required'
+    });
+  }
+
+  // Create a new user object with the generated ID and the fields provided by the user
   let user = {
     id,
     name,
@@ -54,16 +97,59 @@ export function createUser(req, res) {
     age
   };
 
-    users.push(user);
-    res.status(201);
-    res.json(user);
-  }
-  // Add id to user
-  // (Optionally) validate name, age, address
-  // name -> exists and is not null
-  // address -> exists and is not null
-  // age -> exists and is number greater than 0
-  // Add user to users array
-  // Set status code to 201 created
-  // Respond with user object
+  // Add the new user object to the array
+  users.push(user);
+
+  // Set a status code of 201 (created) and return the new user object back to the caller
+  // You need to return the new user so that they can see the generated ID
+  res.status(201);
+  res.json(user);
 }
+
+export function updateUser(req, res) {
+  let id = req.params.id;
+  let name = req.body.name;
+  if(!name || typeof name !== 'string') {
+    res.status(400);
+    return res.json({
+      error: 'name(String) is required'
+    });
+  }
+  let address = req.body.address;
+  if(!address || typeof address !== 'string') {
+    res.status(400);
+    return res.json({
+      error: 'address(String) is required'
+    });
+  }
+  let age = req.body.age;
+  if(!age || typeof age !== 'number') {
+    res.status(400);
+    return res.json({
+      error: 'age(Number) is required'
+    });
+  }
+  let user = {
+    id,
+    name,
+    address,
+    age
+  };
+  users.push(user);
+
+  res.status(200);
+  res.json(user);
+}
+
+export function removeUser(req, res) {
+  let userIndex = findUserIndex(req.params.id);
+  if(userIndex !== -1) {
+    users.splice(userIndex, 1);
+    res.status(204).send();
+  }
+  else {
+    res.status(404);
+    res.json({message: 'Not Found'});
+  }
+}
+
