@@ -2,61 +2,33 @@
 
 // uuidv4 will let us generate unique IDs for our users
 import uuidv4 from 'uuid/v4';
+import User from './users.model';
 
 // We are storing users in memory for now as JSON objects in an array
 let users = [];
 
 // The export keyword makes the function importable in other files
 // (such as /server/api/users/index.js)
-export function listContents(req, res) {
+export function index(req, res) {
   // res.json will return the variable as its JSON string representation
   // https://expressjs.com/en/api.html#res.json
-  res.json({
-    users: users
-  });
+  res.json(User.find());
 }
 
-// I decided to delegate searching the array for a given ID to a helper function.
-// This will let it be reused later (like in an update function)
-function findUser(id) {
-  let foundUsers = users.filter(function(user) {
-    if(user.id === id) {
-      return true;
-    }
-    return false;
-  });
 
-  if(foundUsers.length > 0) {
-    return foundUsers[0];
-  } else {
-    // In JavaScript you could return null or undefined for "no such element"
-    // Here's some discussion about which return value might be better:
-    // https://stackoverflow.com/questions/37980559/is-it-better-to-return-undefined-or-null-from-a-javascript-function
-    return null;
-  }
-}
-
-export function findOne(req, res) {
+export function show(req, res) {
   // the :id in '/:id' declared by /server/api/users/index.js can be accessed in the request object
   // under the params object, i.e. req.params.id
-  let existingUser = findUser(req.params.id);
-
-  if(existingUser) {
-    // Make sure to only call res.status and res.json *once* per request.
-    // If you try to set the status code twice, express.js will give you an error!
-    // A detailed explanation for this can be found here:
-    // https://stackoverflow.com/questions/7042340/error-cant-set-headers-after-they-are-sent-to-the-client
-    res.status(200);
-    res.json(existingUser);
-  } else {
-    // If you don't find the user make sure to return a 404 status code
-    // with a descriptive response
+  var users = User.findById(req.params.id);
+  if(users === null) {
     res.status(404);
     res.json({message: 'Not Found'});
+  } else {
+    res.json(users);
   }
 }
 
-export function createUser(req, res) {
+export function create(req, res) {
   // Generate a random ID
   let id = uuidv4();
 
@@ -90,23 +62,20 @@ export function createUser(req, res) {
   }
 
   // Create a new user object with the generated ID and the fields provided by the user
-  let user = {
-    id,
-    name,
-    address,
-    age
-  };
-
-  // Add the new user object to the array
-  users.push(user);
+  var user = {
+    "id": req.params.id,
+    "name": req.body.name,
+    "address": req.body.address,
+    "age": req.body.age
+  }
 
   // Set a status code of 201 (created) and return the new user object back to the caller
   // You need to return the new user so that they can see the generated ID
   res.status(201);
-  res.json(user);
+  res.send(User.create(user));
 }
 
-export function updateUser(req, res) {
+export function upsert(req, res) {
   let id = req.params.id;
   let name = req.body.name;
   if(!name || typeof name !== 'string') {
@@ -135,21 +104,22 @@ export function updateUser(req, res) {
     address,
     age
   };
-  users.push(user);
-
-  res.status(200);
-  res.json(user);
-}
-
-export function removeUser(req, res) {
-  let userIndex = findUserIndex(req.params.id);
-  if(userIndex !== -1) {
-    users.splice(userIndex, 1);
-    res.status(204).send();
+  var updated = User.findOneAndUpdate(user);
+  if (updated == false) {
+    res.status(201).send(user);
   }
   else {
-    res.status(404);
-    res.json({message: 'Not Found'});
+    res.status(200).send(user);
+  }
+}
+
+export function destroy(req, res) {
+  var destroyed = User.remove(req.params.id);
+
+  if(destroyed === false) {
+    res.json({message: 'Not found'});
+  } else {
+    res.status(204).send();
   }
 }
 
