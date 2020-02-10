@@ -1,125 +1,207 @@
 'use strict';
 
-// uuidv4 will let us generate unique IDs for our users
-import uuidv4 from 'uuid/v4';
-import User from './users.model';
+import {Address, User} from './users.model';
 
-// We are storing users in memory for now as JSON objects in an array
-let users = [];
-
-// The export keyword makes the function importable in other files
-// (such as /server/api/users/index.js)
+// Find all Users
 export function index(req, res) {
-  // res.json will return the variable as its JSON string representation
-  // https://expressjs.com/en/api.html#res.json
-  res.json(User.find());
+  /*
+   The pattern you see below where one function is
+   called right after the other is called method chaining,
+   and is a common practice in JavaScript and many other languages
+   https://en.wikipedia.org/wiki/Method_chaining
+   */
+  User.find()
+    /*
+       For each user object, populate the address attribute.
+       This will make all the attributes available in the address
+       accessible as though the address were a subdocument by joining
+       the two tables for you
+       http://mongoosejs.com/docs/populate.html
+    */
+    .populate('address')
+    /*
+       exec() runs the query and returns a promise object.
+       Promises are a cleaner way to chain asynchronous actions together than
+       callbacks because, instead of nesting functions within functions, you can
+       chain function calls together and pass the return value from one function
+       as the argument to the next! It also allows you to have one method to handle
+       exceptions, instead of having to provide them in each callback function you write
+       http://www.javascriptkit.com/javatutors/javascriptpromises.shtml
+       http://bluebirdjs.com/docs/why-promises.html
+    */
+    .exec()
+    // This then method will only be called if the query was successful, so no need to error check!
+    .then(function(users) {
+      res.json({
+        users
+      });
+    })
+    /*
+     Any errors encountered here must be server side, since there are no arguments to the find
+     Return 500 (server error) and send the error encountered back to the requester
+    */
+    .catch(function(err) {
+      res.status(500);
+      res.send(err);
+    });
 }
 
-
+// Find details for one user
 export function show(req, res) {
-  // the :id in '/:id' declared by /server/api/users/index.js can be accessed in the request object
-  // under the params object, i.e. req.params.id
-  var users = User.findById(req.params.id);
-  if(users === null) {
-    res.status(404);
-    res.json({message: 'Not Found'});
-  } else {
-    res.json(users);
-  }
+  User.findById(req.params.id)
+    .populate('address')
+    .exec()
+    .then(function(existingUser) {
+      /*
+       findById will return null if the object was not found
+       This if check will evaluate to false for a null user
+      */
+      if(existingUser) {
+        // User was found by Id
+        res.status(200);
+        res.json(existingUser);
+      } else {
+        // User was not found
+        res.status(404);
+        res.json({message: 'Not Found'});
+      }
+    })
+    .catch(function(err) {
+      res.status(400);
+      res.send(err);
+    });
 }
 
+// Create a new user
 export function create(req, res) {
-  // Generate a random ID
-  let id = uuidv4();
-
-  // The JSON you POST when calling /api/users
-  // is parsed automatically into req.body and can be accessed directly
-  let name = req.body.name;
-  // Validate parameter exists and is a string
-  if(!name || typeof name !== 'string') {
-    res.status(400);
-    return res.json({
-      error: 'name(String) is required'
-    });
-  }
-
+  /*
+    In this function we are taking the request body
+    As it was sent and using it as the JSON for the address
+    and user objects.
+    Since address is stored in a separate collection from user
+    we must create each document individually, and then associate
+    the address to the user after we know its id
+  */
   let address = req.body.address;
-  // Validate parameter exists and is a string
-  if(!address || typeof address !== 'string') {
-    res.status(400);
-    return res.json({
-      error: 'address(String) is required'
+  let user = req.body;
+  // Start off by saving the address
+  Address.create(address)
+    /*
+     Address was successfully saved, now associate saved address to the
+     user we are about to create and then save the user
+    */
+    .then(function(createdAddress) {
+      user.address = createdAddress;
+      /*
+       This return statement will return a promise object.
+       That means that the following .then in this chain
+       will not occur until after the user is saved, and will be given the result
+       of this promise resolving, which is the created user object
+      */
+      return User.create(user);
+    })
+    // User and Address saved successfully! return 201 with the created user object
+    .then(function(createdUser) {
+      res.status(201);
+      res.json(createdUser);
+    })
+    // An error was encountered during either the save of the address or the save of the user
+    .catch(function(err) {
+      res.status(400);
+      res.send(err);
     });
-  }
-
-  let age = req.body.age;
-  // Validate parameter exists and is a number
-  if(!age || typeof age !== 'number') {
-    res.status(400);
-    return res.json({
-      error: 'age(Number) is required'
-    });
-  }
-
-  // Create a new user object with the generated ID and the fields provided by the user
-  var user = {
-    "id": req.params.id,
-    "name": req.body.name,
-    "address": req.body.address,
-    "age": req.body.age
-  }
-
-  // Set a status code of 201 (created) and return the new user object back to the caller
-  // You need to return the new user so that they can see the generated ID
-  res.status(201);
-  res.send(User.create(user));
 }
 
-export function upsert(req, res) {
-  let id = req.params.id;
-  let name = req.body.name;
-  if(!name || typeof name !== 'string') {
-    res.status(400);
-    return res.json({
-      error: 'name(String) is required'
+// Update a user
+export function update(req, res) {
+  // Start by trying to find the user by its id
+  User.findById(req.params.id)
+    .populate('address')
+    .exec()
+    // Update user and address
+    .then(function(existingUser) {
+      // If user exists, update all fields of the object
+      if(existingUser) {
+        existingUser.address.addressLine1 = req.body.address.addressLine1;
+        existingUser.address.addressLine2 = req.body.address.addressLine2;
+        existingUser.address.city = req.body.address.city;
+        existingUser.address.state = req.body.address.state;
+        existingUser.address.zip = req.body.address.zip;
+        existingUser.age = req.body.age;
+        existingUser.name.firstName = req.body.name.firstName;
+        existingUser.name.middleName = req.body.name.middleName;
+        existingUser.name.lastName = req.body.name.lastName;
+        /*
+         Promise.all takes an array of promises as an argument
+         It ensures that all the promises in the array have successfully resolved before
+         continuing the promise chain. It will pass to the next .then an array of results, one
+         for each promise that was passed
+        */
+        return Promise.all([
+          existingUser.address.increment().save(),
+          existingUser.increment().save()
+        ]);
+      } else {
+        // User was not found
+        return existingUser;
+      }
+    })
+    // This .then will be called after the Promise.all resolves, or be called with null if the user was not found
+    .then(function(savedObjects) {
+      // savedObjects should be defined if Promise.all was invoked (user was found)
+      if(savedObjects) {
+        res.status(200);
+        // The order of responses are guaranteed to be the same as the order of the promises, so we can assume
+        // the second element of the array is the result of the user update
+        res.json(savedObjects[1]);
+      } else {
+        // User was not found
+        res.status(404);
+        res.json({message: 'Not Found'});
+      }
+    })
+    // Error encountered during the save of the user or address
+    .catch(function(err) {
+      res.status(400);
+      res.send(err);
     });
-  }
-  let address = req.body.address;
-  if(!address || typeof address !== 'string') {
-    res.status(400);
-    return res.json({
-      error: 'address(String) is required'
-    });
-  }
-  let age = req.body.age;
-  if(!age || typeof age !== 'number') {
-    res.status(400);
-    return res.json({
-      error: 'age(Number) is required'
-    });
-  }
-  let user = {
-    id,
-    name,
-    address,
-    age
-  };
-  var updated = User.findOneAndUpdate(user);
-  if (updated == false) {
-    res.status(201).send(user);
-  }
-  else {
-    res.status(200).send(user);
-  }
 }
 
+// Remove a user
 export function destroy(req, res) {
-  var destroyed = User.remove(req.params.id);
-
-  if(destroyed === false) {
-    res.json({message: 'Not found'});
-  } else {
-    res.status(204).send();
-  }
+  User.findById(req.params.id)
+    .populate('address')
+    .exec()
+    .then(function(existingUser) {
+      if(existingUser) {
+        /*
+          This is the equivalent of cascading delete in a relational database
+          If the user was found, remove both the user object and the address object from
+          their respective collections. Only record the delete as successful if both objects
+          are deleted
+         */
+        return Promise.all([
+          existingUser.address.remove(),
+          existingUser.remove()
+        ]);
+      } else {
+        return existingUser;
+      }
+    })
+    // Delete was successful
+    .then(function(deletedUser) {
+      if(deletedUser) {
+        res.status(204).send();
+      } else {
+        // User was not found
+        res.status(404);
+        res.json({message: 'Not Found'});
+      }
+    })
+    // Address or user delete failed
+    .catch(function(err) {
+      res.status(400);
+      res.send(err);
+    });
 }
 

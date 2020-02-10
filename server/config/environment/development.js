@@ -6,7 +6,7 @@ module.exports = {
     // MongoDB connection options
     mongo: {
         useMongoClient: true,
-        uri: process.env.MONGODB_URI || 'mongodb://web2-mongodb/angular2-dev'
+        uri: process.env.MONGODB_URI || 'mongodb://web2-mongodb/web2-liayu'
     },
 
     // Seed database on startup
