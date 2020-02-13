@@ -1,5 +1,5 @@
 // Create a new database named blogger with a collection named articles
-mongo --host mongodb:27017 blogger
+mongo --host mongodb:27017 blogger;
 
 db.articles.insert({
   author_name: "Liangyin Yu",

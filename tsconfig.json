@@ -23,7 +23,9 @@
   ],
   "exclude": [
     "node_modules",
-    "client/**/*.spec.ts"
+    "client/**/*.spec.ts",
+    "lectures/**/*",
+    "labs/**/*"
   ],
   "filesGlob": [
     "client/{app,components}/**/!(*.spec).ts"
