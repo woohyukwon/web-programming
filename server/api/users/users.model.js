@@ -21,7 +21,7 @@ let addressSchema = Schema({
 });
 
 // This schema represents the name of the user
-let nameSchema = Schema({
+let fullnameSchema = Schema({
   // firstName is a simple String type that is required
   firstName: {type: String, required: true},
   // middleName is a simple String type that is not required
@@ -32,7 +32,7 @@ let nameSchema = Schema({
 
 // This is the main user schema
 let userSchema = Schema({
-  // Age is a simple number type that is required
+  username: {type: String, required: true, index: true, unique: true},
   age: {type: Number, required: true},
   /*
    Address is referenced as a 'foreign key' using the objectId
@@ -48,7 +48,8 @@ let userSchema = Schema({
    ObjectId reference and the schema for name can be
    referenced directly
   */
-  name: nameSchema
+  email: {type: String, required: true},
+  name: fullnameSchema
 });
 
 /*

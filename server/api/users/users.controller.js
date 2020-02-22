@@ -128,6 +128,7 @@ export function update(req, res) {
         existingUser.address.state = req.body.address.state;
         existingUser.address.zip = req.body.address.zip;
         existingUser.age = req.body.age;
+        existingUser.email = req.body.email;
         existingUser.name.firstName = req.body.name.firstName;
         existingUser.name.middleName = req.body.name.middleName;
         existingUser.name.lastName = req.body.name.lastName;

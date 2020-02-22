@@ -1,20 +1,10 @@
 <div class="container">
   <div class="row">
     <div class="col-lg-12">
-      <h1 class="page-header">Lab 12: Angular Routing</h1>
-
-      <h1>Enter a value here: <input [(ngModel)]="input"></h1>
-
-      <h2>You entered: {{ input }}</h2>
-
-      <h1>Contents of values array:</h1>
-      <ul>
-        <li *ngFor="let value of values">{{ value }}</li>
-      </ul>
-
-      <hr size="5">
-      <h1>{{ valueToSquare }} * {{ valueToSquare }} = {{ valueToSquare | square }}</h1>
-
+      <h1 class="page-header">user information</h1>
+      <br><br>
+      <h1 ng-if="usersController.valueEntered">user id: {{ UsersComponent.id }}</h1>
+      <br><br>
       <hr size="5">
       <table class="table">
         <thead>
@@ -29,16 +19,11 @@
           <th>City</th>
           <th>State</th>
           <th>Zip</th>
-          <th>Edit User</th>
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let user of users">
-          <td>
-            <button [routerLink]="['/users', user._id]"
-                    type="button" class="btn btn-default">{{user._id}}
-            </button>
-          </td>
+        <tr ng-repeat="user in usersController.users">
+          <td><a ng-href="/users/{{user._id}}">{{user._id}}</a></td>
           <td>{{user.age}}</td>
           <td>{{user.name.firstName}}</td>
           <td>{{user.name.middleName}}</td>
@@ -48,18 +33,10 @@
           <td>{{user.address.city}}</td>
           <td>{{user.address.state}}</td>
           <td>{{user.address.zip}}</td>
-          <td>
-            <button (click)="editUser(user)"
-                    type="button" class="btn btn-default">Edit User
-            </button>
-          </td>
         </tr>
         </tbody>
       </table>
-    </div>
 
-    <div>
-      <button [routerLink]="['/about']">About the Author</button>
     </div>
   </div>
 </div>
