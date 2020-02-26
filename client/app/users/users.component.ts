@@ -12,7 +12,7 @@ import {User} from "../../components/interfaces/User";
 })
 
 export class UsersComponent implements OnInit {
-  id: number;
+  id: String;
   user: User = new User();
   users: Users;
 
@@ -25,9 +25,22 @@ export class UsersComponent implements OnInit {
     this.http = http;
     this.userService = userService;
     this.route = route;
+    this.route.params.subscribe(params => {
+      this.id = params['id'];
+      this.getUserById(this.id);
+    });
   }
 
   ngOnInit() {
-  this.user = this.userService.getUserById(this.route.params.id);
+  }
+
+  getUserById(id: string) {
+    this.userService.getUserById(id).subscribe(
+      result => {
+        this.user = result.result;
+      }
+      });
   }
 }
+
+
