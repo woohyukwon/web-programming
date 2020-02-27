@@ -20,6 +20,8 @@ export class UsersComponent implements OnInit {
 
   ngOnInit() git checkout mastergit add .
   git commit -m "Completed lab 12"
+  git push -u origin mastergit checkout mastergit add .
+  git commit -m "Completed lab 12"
   git push -u origin master{
     this.route.params.subscribe(params => {
       this.userService.getUserById(params.id)
