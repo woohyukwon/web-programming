@@ -1,46 +1,31 @@
 import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
-import {HttpClient} from '@angular/common/http';
+import {User} from '../../components/interfaces/User';
 import {UserService} from '../../components/services/user.service';
-import {Users} from '../../components/interfaces/Users';
-import {User} from "../../components/interfaces/User";
+import {ActivatedRoute} from '@angular/router';
 
 @Component({
   selector: 'users',
   template: require('./users.html'),
   styles: [require('./users.scss')],
 })
-
 export class UsersComponent implements OnInit {
-  id: String;
-  user: User = new User();
-  users: Users;
 
+  private user: User;
+  static parameters = [ActivatedRoute, UserService];
 
-  constructor(
-    private http: HttpClient,
-    private userService: UserService,
-    private route: ActivatedRoute
-  ) {
-    this.http = http;
-    this.userService = userService;
+  constructor(private route: ActivatedRoute, private userService: UserService) {
     this.route = route;
+    this.userService = userService;
+  }
+
+  ngOnInit() git checkout mastergit add .
+  git commit -m "Completed lab 12"
+  git push -u origin master{
     this.route.params.subscribe(params => {
-      this.id = params['id'];
-      this.getUserById(this.id);
+      this.userService.getUserById(params.id)
+        .then(user => {
+          this.user = user;
+        });
     });
   }
-
-  ngOnInit() {
-  }
-
-  getUserById(id: string) {
-    this.userService.getUserById(id).subscribe(
-      result => {
-        this.user = result.result;
-      }
-      });
-  }
 }
-
-

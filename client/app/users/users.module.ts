@@ -12,7 +12,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { UsersComponent } from './users.component';
 
 export const ROUTES: Routes = [
-  { path: '/users/:id', component: UsersComponent },
+  { path: 'users/:id', component: UsersComponent },
 ];
 
 @NgModule({
