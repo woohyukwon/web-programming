@@ -1,7 +1,7 @@
 <div class="container">
   <div class="row">
     <div class="col-lg-12">
-      <h1 class="page-header">Lab 12: Angular Routing</h1>
+      <h1 class="page-header">Lab 13: ngx-bootstrap Modal Dialogs</h1>
 
       <h1>Enter a value here: <input [(ngModel)]="input"></h1>
 
@@ -16,6 +16,7 @@
       <h1>{{ valueToSquare }} * {{ valueToSquare }} = {{ valueToSquare | square }}</h1>
 
       <hr size="5">
+      <button (click)="createUser()" type="button" class="btn btn-default">Create new User</button>
       <table class="table">
         <thead>
         <tr>
@@ -29,6 +30,7 @@
           <th>City</th>
           <th>State</th>
           <th>Zip</th>
+          <th>Edit User</th>
         </tr>
         </thead>
         <tbody>
@@ -47,6 +49,11 @@
           <td>{{user.address.city}}</td>
           <td>{{user.address.state}}</td>
           <td>{{user.address.zip}}</td>
+          <td>
+            <button (click)="updateUser(user)"
+                    type="button" class="btn btn-default">Edit User
+            </button>
+          </td>
         </tr>
         </tbody>
       </table>
