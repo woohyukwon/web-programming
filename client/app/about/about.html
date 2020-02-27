@@ -1,0 +1,18 @@
+<div class="container">
+  <div class="row">
+    <div class="col-lg-12">
+      <h1 class="page-header">About Page</h1>
+    </div>
+    <div>
+      Name: {{ about?.name.first }}
+      {{ about?.name.last }}
+    </div>
+    <div>
+      Email: <a [href]="mailtoURL">
+      {{about?.email}}</a>
+    </div>
+    <div>
+      Course Name: {{ about?.course }}
+    </div>
+  </div>
+</div>

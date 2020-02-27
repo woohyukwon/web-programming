@@ -14,12 +14,15 @@ import { RouterModule, Routes } from '@angular/router';
 
 import { AppComponent } from './app.component';
 import { MainModule } from './main/main.module';
+import { AboutModule } from './about/about.module';
+import { UsersModule } from './users/users.module';
 
 export function tokenGetter() {
     return localStorage.getItem('id_token');
 }
 
-const appRoutes: Routes = [{ path: '',
+const appRoutes: Routes = [{ path:
+    '',
     redirectTo: '/home',
     pathMatch: 'full'
 }];
@@ -30,7 +33,9 @@ const appRoutes: Routes = [{ path: '',
         HttpClientModule,
 
         RouterModule.forRoot(appRoutes, { enableTracing: process.env.NODE_ENV === 'development' }),
-        MainModule
+        MainModule,
+        AboutModule,
+        UsersModule
     ],
     declarations: [
         AppComponent,
