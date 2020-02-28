@@ -6,6 +6,7 @@ import {FormsModule} from '@angular/forms';
 import {RouterModule, Routes} from '@angular/router';
 
 import {TooltipModule} from 'ngx-bootstrap';
+import { BsDatepickerModule } from 'ngx-bootstrap/datepicker';
 
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
@@ -28,6 +29,7 @@ export const ROUTES: Routes = [
     CreateUserModule,
     RouterModule.forChild(ROUTES),
 
+    BsDatepickerModule.forRoot(),
     TooltipModule.forRoot(),
   ],
   declarations: [
