@@ -41,7 +41,6 @@
         "passport-twitter": "^1.0.4",
         "rxjs-compat": "6",
         "serve-favicon": "^2.5.0",
-        "uuid": "^3.4.0",
         "uuidv4": "^6.0.1"
     },
     "devDependencies": {
@@ -65,6 +64,7 @@
         "@types/sinon": "^7.5.1",
         "@types/sinon-chai": "^3.2.3",
         "@types/webpack": "^4.41.1",
+        "@typescript-eslint/parser": "^2.19.0",
         "angular-validation-match": "^1.9.0",
         "autoprefixer": "^9.7.3",
         "awesome-typescript-loader": "^5.2.1",
@@ -133,8 +133,8 @@
         "karma-webpack": "4.0.2",
         "lazypipe": "^1.0.2",
         "mini-css-extract-plugin": "~0.9.0",
-        "mocha": "^6.2.2",
-        "ngx-bootstrap": "^5.3.2",
+        "mocha": "7.1.0",
+        "ngx-bootstrap": "^5.2.0",
         "node-sass": "^4.13.0",
         "nodemon": "^2.0.2",
         "null-loader": "^3.0.0",

@@ -15,8 +15,10 @@ export class MainComponent implements OnInit {
 
   private values: string[];
   private valueToSquare: number;
-  private users: User[];
+  public users: User[] = [];
   private input: string;
+  private rating: Number = 4.3;
+  private max: Number = 5;
   static parameters = [HttpClient, UserService, BsModalService];
 
   constructor(private http: HttpClient, private userService: UserService, private modalService: BsModalService) {
