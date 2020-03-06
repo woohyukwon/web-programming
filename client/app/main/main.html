@@ -18,9 +18,19 @@
       <h2>You entered: {{ input }}</h2>
 
       <h1>Contents of values array:</h1>
-      <ul>
-        <li *ngFor="let value of values">{{ value }}</li>
-      </ul>
+        <div *ngFor="let value of values; let indexOfElement=index;">
+          <ul>
+            <li >
+              Index: {{ indexOfElement }}
+              <br>
+              <input [ngModel]="value" (ngModelChange)="values[indexOfElement] = $event">
+            </li>
+            <li >Value: {{ value }}</li>
+          </ul>
+        </div>
+        <input *ngFor="let value of values;" [(ngModel)]="value">
+        <br>
+        <button (click)="values.push('');" type="button" class="btn btn-default">Add New Value</button>
 
       <hr size="5">
       <h1>{{ valueToSquare }} * {{ valueToSquare }} = {{ valueToSquare | square }}</h1>
