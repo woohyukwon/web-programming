@@ -10,7 +10,7 @@ describe('Main View', function() {
         });
     });
 
-    xit('should include header with correct title', function() {
+    it('should include header with correct title', function() {
         expect(page.pageHeader.getText()).to.eventually.equal('Lab 17 - Automated Testing');
     });
 });
