@@ -16,23 +16,35 @@ import { AppComponent } from './app.component';
 import { MainModule } from './main/main.module';
 import { AboutModule } from './about/about.module';
 import { UsersModule } from './users/users.module';
+import { DirectivesModule } from '../components/directives.module';
+import { JwtModule } from '@auth0/angular-jwt';
+import { AccountModule } from './account/account.module';
+import { AdminModule } from './admin/admin.module';
 
 export function tokenGetter() {
     return localStorage.getItem('id_token');
 }
 
-const appRoutes: Routes = [{ path: '',
-    redirectTo: '/home',
-    pathMatch: 'full'
+const appRoutes: Routes = [{ path: '**',
+    redirectTo: '/home'
 }];
 
 @NgModule({
     imports: [
         BrowserModule,
         HttpClientModule,
+        JwtModule.forRoot({
+            config: {
+                tokenGetter,
+            }
+        }),
 
         RouterModule.forRoot(appRoutes, { enableTracing: process.env.NODE_ENV === 'development' }),
+
         MainModule,
+        DirectivesModule,
+        AccountModule,
+        AdminModule,
         AboutModule,
         UsersModule
     ],

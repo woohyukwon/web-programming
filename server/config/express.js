@@ -14,6 +14,7 @@ import errorHandler from 'errorhandler';
 import path from 'path';
 import lusca from 'lusca';
 import config from './environment';
+import passport from 'passport';
 import session from 'express-session';
 
 export default function(app) {
@@ -43,13 +44,14 @@ export default function(app) {
     app.use(bodyParser.json());
     app.use(methodOverride());
     app.use(cookieParser());
+    app.use(passport.initialize());
 
   // We need to enable sessions for passport-twitter because it's an
   // oauth 1.0 strategy, and Lusca depends on sessions
   app.use(session({
     secret: config.secrets.session,
     saveUninitialized: true,
-    resave: false
+    resave: true
   }));
 
     /**
@@ -59,7 +61,10 @@ export default function(app) {
     if(env !== 'test' && env !== 'development') {
         app.use(lusca({
             csrf: {
-                header: 'x-xsrf-token',
+              header: 'x-xsrf-token',
+              cookie: {
+                name: 'XSRF-TOKEN'
+              }
             },
             xframe: 'SAMEORIGIN',
             hsts: {
