@@ -1,0 +1,30 @@
+<div class="modal-content">
+  <form id="updateReview" name="updateReview" role="form" class="form-horizontal">
+    <div class="modal-header">
+      <button type="button" (click)="bsModalRef.hide()" class="close"><span
+        aria-hidden="true">×</span><span class="sr-only">Close</span></button>
+      <h4 id="myModalLabel" class="modal-title">Updating recipe</h4>
+    </div>
+    <div class="modal-body">
+      <div role="alert" [hidden]="!formError" class="alert alert-danger">{{ formError }}</div>
+      <div role="alert" [hidden]="!formInfo" class="alert alert-info">{{ formInfo }}</div>
+      <div class="form-group">
+        <label for="Description" class="col-xs-2 col-sm-2 control-label">Description</label>
+        <div class="col-xs-10 col-sm-10">
+          <input id="Description" name="Description" required="required" [(ngModel)]="review.description" class="form-control"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="Rating" class="col-xs-2 col-sm-2 control-label">Rating</label>
+        <div class="col-xs-10 col-sm-10">
+          <input id="Rating" name="Rating" required="required" [(ngModel)]="review.rating" class="form-control"/>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button (click)="bsModalRef.hide()" type="button" class="btn btndefault">
+        Cancel</button>
+      <button type="submit" class="btn btn-primary" (click)="updateReview()">Update recipe</button>
+    </div>
+  </form>
+</div>

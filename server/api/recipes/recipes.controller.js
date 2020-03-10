@@ -9,7 +9,9 @@ export function index(req, res) {
     .populate('reviews')
     .exec()
     .then(function(recipes) {
-      res.json(recipes);
+      res.json({
+        recipes
+      });
     })
     .catch(function(err) {
       res.status(500);
@@ -27,18 +29,14 @@ export function show(req, res) {
         res.status(200);
         res.json(existingRecipe);
       } else {
-        return Promise.reject(new Error('Recipe not found'));
+        res.status(404);
+        res.json({message: 'Not Found'});
       }
     })
     .catch(function(err) {
-      if(err.message.toLowerCase().includes('not found')) {
-        res.status(404);
-        res.json({message: err.message});
-      } else {
         res.status(400);
         console.error(err);
         res.send(err.toString());
-      }
     });
 }
 
@@ -58,7 +56,7 @@ export function create(req, res) {
 
 export function createReview(req, res) {
   let review = req.body;
-  let recipeToUpdate = null;
+  let updatedRecipe = null;
   let createdReview = null;
 
   Recipe.findById(req.params.recipeId)
@@ -66,42 +64,35 @@ export function createReview(req, res) {
     .exec()
     .then(function(existingRecipe) {
       if(existingRecipe) {
-        recipeToUpdate = existingRecipe;
+        updatedRecipe = existingRecipe;
         return User.findOne({username: review.user}).exec();
-      } else {
-        return Promise.reject(new Error('Recipe not found'));
+        //use username to find user
       }
     })
     .then(function(existingUser) {
       if(existingUser) {
         review.user = existingUser;
-        // Don't allow custom create date
-        if(review.createdDate) {
-          review.createDate = null;
-        }
         return Review.create(review);
-      } else {
-        return Promise.reject(new Error('User not found'));
       }
     })
     .then(function(savedReview) {
-      recipeToUpdate.reviews.push(savedReview);
+      updatedRecipe.reviews.push(savedReview);
       createdReview = savedReview;
-      return recipeToUpdate.save();
+      return updatedRecipe.save();
     })
     .then(function(savedRecipe) {
-      res.status(201);
-      res.json(createdReview);
+      if(savedRecipe){
+        res.status(201);
+        res.json(createdReview);
+      } else {
+        res.status(404);
+        res.json({message: 'Not Found'});
+      }
     })
     .catch(function(err) {
-      if(err.message.toLowerCase().includes('not found')) {
-        res.status(404);
-        res.json({message: err.message});
-      } else {
         res.status(400);
         console.error(err);
         res.send(err.toString());
-      }
     });
 }
 
@@ -117,24 +108,59 @@ export function update(req, res) {
         existingRecipe.cookTime = req.body.cookTime;
         existingRecipe.directions = req.body.directions;
         existingRecipe.ingredients = req.body.ingredients;
-        return existingRecipe.increment().save();
-      } else {
-        return Promise.reject(new Error('Recipe not found'));
+        return Promise.all([
+          existingRecipe.increment().save()
+        ]);
+      }else {
+        return existingRecipe;
       }
     })
     .then(function(savedRecipe) {
-      res.status(200);
-      res.json(savedRecipe);
-    })
-    .catch(function(err) {
-      if(err.message.toLowerCase().includes('not found')) {
+      if(savedRecipe){
+        res.status(200);
+        res.json(savedRecipe);
+      }else {
         res.status(404);
-        res.json({message: err.message});
-      } else {
+        res.json({message: 'Not Found'});
+      }})
+    .catch(function(err) {
         res.status(400);
         console.error(err);
         res.send(err.toString());
+    });
+}
+
+export function indexReview(req, res) {
+  Review.find()
+    .exec()
+    .then(function (reviews) {
+      res.json({
+        reviews
+      });
+    })
+    .catch(function (err) {
+      res.status(500);
+      console.error(err);
+      res.send(err.toString());
+    });
+}
+
+export function showReview(req, res) {
+  Review.findById(req.params.reviewId)
+    .exec()
+    .then(function (existingReview) {
+      if (existingReview) {
+        res.status(200);
+        res.json(existingReview);
+      } else {
+        res.status(404);
+        res.json({ message: 'Recipe Not Found' });
       }
+    })
+    .catch(function (err) {
+      res.status(400);
+      console.error(err);
+      res.send(err.toString());
     });
 }
 
@@ -142,39 +168,35 @@ export function updateReview(req, res) {
   Recipe.findById(req.params.recipeId)
     .exec()
     .then(function(existingRecipe) {
-      if(!existingRecipe) {
-        return Promise.reject(new Error('Recipe not found'));
-      } else {
+      if(existingRecipe){
         return Review.findById(req.params.reviewId);
       }
     })
     .then(function(existingReview) {
       if(existingReview) {
-        // Don't allow user or create date to be changed on an update of a review
         existingReview.description = req.body.description;
         existingReview.rating = req.body.rating;
-        return existingReview.increment().save();
+        existingReview.date = new Date();
+        return Promise.all([
+          existingReview.increment().save()
+        ]);
       } else {
-        return Promise.reject(new Error('Review not found'));
+        return existingReview;
       }
     })
-    .then(function(updateStatus) {
-      // update method does not return updated object, query for it here to return from API
-      return Review.findById(req.params.reviewId);
-    })
-    .then(function(updatedReview) {
-      res.status(200);
-      res.json(updatedReview);
+    .then(function(savedReview) {
+      if(savedReview){
+        res.status(200);
+        res.json(savedReview);
+      }else {
+        res.status(404);
+        res.json({ message: 'Not Found' });
+      }
     })
     .catch(function(err) {
-      if(err.message.toLowerCase().includes('not found')) {
-        res.status(404);
-        res.json({message: err.message});
-      } else {
         res.status(400);
         console.error(err);
         res.send(err.toString());
-      }
     });
 }
 
@@ -189,21 +211,17 @@ export function destroy(req, res) {
         promises.push(existingRecipe.remove());
         return Promise.all(promises);
       } else {
-        return Promise.reject(new Error('Review not found'));
+        res.status(404);
+        res.json({ message: 'Review Not Found' });
       }
     })
-    .then(function(deletedUser) {
+    .then(function(deletedRecipe) {
       res.status(204).send();
     })
     .catch(function(err) {
-      if(err.message.toLowerCase().includes('not found')) {
-        res.status(404);
-        res.json({message: err.message});
-      } else {
         res.status(400);
         console.error(err);
         res.send(err.toString());
-      }
     });
 }
 
@@ -220,23 +238,20 @@ export function destroyReview(req, res) {
             Review.findByIdAndRemove(req.params.reviewId)
           ])
         } else {
-          return Promise.reject(new Error('Review not found in recipe'));
+          res.status(404);
+          res.json({ message: 'Review Not Found' });
         }
       } else {
-        return Promise.reject(new Error('Recipe not found'));
+        res.status(404);
+        res.json({ message: 'Recipe Not Found' });
       }
     })
-    .then(function(results) {
+    .then(function(deletedReview) {
       res.status(204).send();
     })
     .catch(function(err) {
-      if(err.message.toLowerCase().includes('not found')) {
-        res.status(404);
-        res.json({message: err.message});
-      } else {
         res.status(400);
         console.error(err);
         res.send(err.toString());
-      }
     });
 }

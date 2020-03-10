@@ -1,0 +1,78 @@
+Project 1
+
+All of schemas are created follow the Project Postman Tests.
+
+Schema:
+
+Users.model：
+
+userSchema：
+name: implemented as a subdocument, type: nameSchame
+username: username can be made up of every characters or numbers, so type is String. This field should be unique
+email: email made up of numbers symbols and letters,so type is String. This field should be unique
+All these three are required.
+
+nameSchema
+firstName：usually composed of strings of letters, so type is String
+lastName: usually composed of strings of letters, so type is String
+All these two are required.
+
+
+Reviews.model:
+
+reviewSchema:
+description: it could be long sentences, so type is String
+rating: it present number of stars, so type is Number
+date: just like its name, the type is Date, and it will automatically by the server when the review create
+user: it references the userSchema, so type is Objected
+All these four are required.
+
+
+Recipes.model:
+
+recipesSchema:
+name: it can be several words, so type is String
+description: it could be long sentences, so type is String
+image: it is a URL of a picture, so type is String
+prepTime:it show how many minute or hours it need to prepare, so type is Number
+cookTime:it show how many minute or hours it need to cook, so type is Number
+directions: it may be several steps, so type is Array of String
+ingredients: implemented as a subdocument, but it may have several ingredients, so type is Array of ingredientsSchema
+reviews: it references the reviewSchema, so type is Objected, but it no need to be create when create the recipe
+
+ingredientsSchema:
+name: it can be several words, so type is String
+amount: it should be a number with unit, so type is String
+
+
+
+RESTful API:
+
+users:
+/api/users
+get: no need to input, it will return all users' data. It will return 500 when if there is error.
+post: it need to input JSON object follow the userSchema, and it will return the user if create successful. It will return 201 if create successful and 400 if not.
+
+/api/users/:id
+get: no need to input, return 400 means error show up, 404 means can not find the user, and 200 mean if find user by id.
+put:it need to input JSON object follow the userSchema, and it will return the user if update successful. Code 200 means update successful, 404 mean can not find the user by id, 400 means error show up and update fail.
+delete:no need to input, return 204 means delete successful, 404 means can not find the user by id, 400 means error show up and update fail.
+
+recipes:
+/api/recipes
+get: no need to input, it will return all recipes' data. It will return 500 when if there is error.
+post: it need to input JSON object follow the recipesSchema, and it will return the recipe if create successful. It will return 201 if create successful and 400 if not.
+
+/api/recipes/:id
+get: no need to input, return 400 means error show up, 404 means can not find the recipe, and 200 mean if find recipe by id.
+put:it need to input JSON object follow the recipeSchema, and it will return the recipe if update successful. Code 200 means update successful, 404 mean can not find the recipe by id, 400 means error show up and update fail.
+delete:no need to input, return 204 means delete successful, 404 means can not find the recipe by id, 400 means error show up and update fail. Also, it will delete its reviews.
+
+/api/recipes/:recipeId/reviews
+get: no need to input, it will return all reviews'data of this recipe. It will return 500 when if there is error.
+post: it need to input JSON object follow the reviewsSchema, and it will return the review if create successful. It will return 201 if create successful and 400 if not. When create successfull, it will updated to recipe.reviews
+
+/api/recipes/:recipeId/reviews/:reviewId
+get:no need to input, return 400 means error show up, 404 means can not find the review, and 200 mean if find review by id.
+put:it need to input JSON object follow the reviewSchema, and it will return the review if update successful. Code 200 means update successful, 404 mean can not find the review by id, 400 means error show up and update fail. When delete successfull, it will updated to recipe.reviews
+destroy:no need to input, return 204 means delete successful, 404 means can not find the review by id, 400 means error show up and update fail. When delete successfull, it will updated to recipe.reviews

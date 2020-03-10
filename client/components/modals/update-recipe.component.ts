@@ -1,15 +1,15 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { BsModalRef } from 'ngx-bootstrap/modal';
-import { User } from '../interfaces/User';
+import { Recipe } from '../interfaces/Recipe';
 
 @Component({
-  selector: 'update-user',
-  template: require('./update-user.html')
+  selector: 'update-recipe',
+  template: require('./update-recipe.html')
 })
 
-export class UpdateUserComponent {
+export class UpdateRecipeComponent {
   @Input()
-  user: User;
+  recipe: Recipe;
 
   @Input()
   formError: String;
@@ -18,7 +18,7 @@ export class UpdateUserComponent {
   formInfo: String;
 
   @Output()
-  updatedUser: EventEmitter<User> = new EventEmitter<User>();
+  updatedRecipe: EventEmitter<Recipe> = new EventEmitter<Recipe>();
 
   static parameters = [BsModalRef];
   constructor(public bsModalRef: BsModalRef) {}
@@ -27,7 +27,7 @@ export class UpdateUserComponent {
     return index;
   }
 
-  updateUser() {
-    this.updatedUser.emit(this.user);
+  updateRecipe() {
+    this.updatedRecipe.emit(this.recipe);
   }
 }

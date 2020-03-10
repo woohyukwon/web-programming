@@ -5,7 +5,10 @@ let router = express.Router();
 
 // GET methods
 router.get('/', controller.index);
+router.get('/:recipeId/reviews', controller.indexReview);
 router.get('/:id', controller.show);
+router.get('/:recipeId/reviews/:reviewId', controller.showReview);
+
 
 // POST method
 router.post('/', controller.create);
